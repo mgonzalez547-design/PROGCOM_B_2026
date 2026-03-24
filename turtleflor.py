@@ -17,7 +17,9 @@ def draw_filled_circle(x, y, radius, color):
     t.circle(radius)
     t.end_fill()
 
-def draw_flower(x, y, petal_color, size=18): # Slightly smaller flowers for the smaller cone
+def draw_flower(x, y, petal_color, size=22):
+
+
     t.fillcolor(petal_color)
     for i in range(5):
         t.penup()
@@ -28,6 +30,8 @@ def draw_flower(x, y, petal_color, size=18): # Slightly smaller flowers for the 
         t.begin_fill()
         t.circle(size * 0.75)
         t.end_fill()
+    
+
     draw_filled_circle(x, y, size * 0.5, "#FFD700")
 
 def draw_leaf(x, y, angle):
@@ -37,54 +41,64 @@ def draw_leaf(x, y, angle):
     t.fillcolor("#32CD32")
     t.pendown()
     t.begin_fill()
-    t.circle(40, 90) # Smaller leaves
+    t.circle(50, 90)
     t.left(90)
-    t.circle(40, 90)
+    t.circle(50, 90)
     t.end_fill()
 
 def draw_wrapper():
-    """Draws a smaller, more compact cone."""
+    """Draws the tan cone-shaped wrapper."""
     t.penup()
-    t.goto(0, -100) # Moved up from -180
+    t.goto(0, -180) 
     t.pendown()
     t.fillcolor("#FFF2CC")
     t.begin_fill()
-    t.goto(90, 80)  # Narrower (90) and shorter (80)
+    t.goto(130, 150) 
     t.setheading(145)
-    t.circle(160, 70) # Tighter curve for the top
-    t.goto(0, -100) 
+    t.circle(230, 70)
+    t.goto(0, -180) 
     t.end_fill()
 
 def draw_bow():
-    cx, cy = 0, -75 # Moved up to match the new cone base
+    cx, cy = 0, -140 
     t.penup()
     t.goto(cx, cy)
     t.fillcolor("#FF66B2")
+    
     t.begin_fill()
-    t.goto(cx + 50, cy + 35)
-    t.goto(cx + 50, cy - 35)
+    t.goto(cx + 65, cy + 45)
+    t.goto(cx + 65, cy - 45)
     t.goto(cx, cy)
-    t.goto(cx - 50, cy + 35)
-    t.goto(cx - 50, cy - 35)
+    t.goto(cx - 65, cy + 45)
+    t.goto(cx - 65, cy - 45)
     t.goto(cx, cy)
     t.end_fill()
-    draw_filled_circle(cx, cy, 15, "#FF66B2")
+    
+    draw_filled_circle(cx, cy, 20, "#FF66B2")
 
-# --- DRAWING ---
 
 draw_wrapper()
 
-# Leaves adjusted for the smaller height
-draw_leaf(-70, 70, 130)  
-draw_leaf(65, 75, 50)    
 
-# Flowers shifted down to fit the smaller cone (Lower Y values)
-draw_flower(-50, 80, "#FF8A8A", 20)  
-draw_flower(0, 95, "#33CCFF", 20)    
-draw_flower(55, 85, "#FF9900", 20)   
-draw_flower(-30, 40, "#FFB6C1", 18)  
-draw_flower(30, 45, "#FFFFFF", 18)   
-draw_flower(0, 10, "#C080FF", 18)     
+draw_leaf(-95, 140, 130) 
+draw_leaf(-120, 70, 160) 
+draw_leaf(85, 145, 50) 
+
+
+draw_flower(-70, 145, "#FF8A8A", 24)
+draw_flower(0, 160, "#33CCFF", 24)   
+draw_flower(75, 150, "#FF9900", 24)   
+
+
+draw_flower(-40, 90, "#FFB6C1", 22)
+draw_flower(40, 100, "#FFFFFF", 22)
+draw_flower(-90, 80, "#FFDAB9", 22)
+draw_flower(100, 90, "#FF8C00", 20)
+
+draw_flower(0, 45, "#C080FF", 22)
+draw_flower(-50, 30, "#FFD1DC", 20)
+draw_flower(50, 25, "#AFEEEE", 20)
+
 
 draw_bow()
 
