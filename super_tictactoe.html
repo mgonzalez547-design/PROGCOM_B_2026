@@ -1,0 +1,239 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+#app{padding:1rem;max-width:700px;margin:0 auto}
+h2{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:.5rem;text-align:center}
+#status{font-size:14px;color:var(--color-text-secondary);text-align:center;margin-bottom:1rem;min-height:20px}
+#big-board{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:560px;margin:0 auto}
+.macro-cell{border:2.5px solid var(--color-border-primary);border-radius:8px;padding:4px;position:relative;transition:background .2s}
+.macro-cell.active{background:rgba(55,138,221,0.08);border-color:#378ADD}
+.macro-cell.won-X{background:rgba(55,138,221,0.15);border-color:#185FA5}
+.macro-cell.won-O{background:rgba(226,75,74,0.12);border-color:#A32D2D}
+.macro-cell.drawn{background:var(--color-background-secondary)}
+.mini-board{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.mini-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer;font-size:clamp(10px,2.5vw,22px);font-weight:500;transition:background .15s;border:0.5px solid var(--color-border-tertiary)}
+.mini-cell:hover:not(.taken){background:var(--color-background-secondary)}
+.mini-cell.taken{cursor:default}
+.mini-cell.x{color:#185FA5}
+.mini-cell.o{color:#A32D2D}
+.macro-winner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,8vw,56px);font-weight:500;border-radius:6px;pointer-events:none}
+.macro-winner.X{color:#185FA5}
+.macro-winner.O{color:#A32D2D}
+.macro-winner.D{color:var(--color-text-secondary);font-size:clamp(16px,4vw,32px)}
+#controls{display:flex;gap:8px;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+button{border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);padding:7px 18px;border-radius:var(--border-radius-md);cursor:pointer;font-size:13px;font-weight:500}
+button:hover{background:var(--color-background-secondary)}
+#pick-screen{text-align:center;padding:2rem 1rem}
+#pick-screen h2{margin-bottom:1rem}
+#pick-screen p{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem}
+.pick-btn{font-size:20px;padding:12px 32px;margin:0 8px;border-width:1.5px}
+.pick-btn:hover{background:var(--color-background-secondary)}
+#legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--color-text-secondary);margin-top:.5rem}
+.leg{display:flex;align-items:center;gap:4px}
+.dot{width:10px;height:10px;border-radius:50%}
+</style>
+
+<div id="app">
+  <div id="pick-screen">
+    <h2>Super Tic-Tac-Toe</h2>
+    <p>Elige tu símbolo para comenzar. La máquina tomará el otro.</p>
+    <button class="pick-btn" onclick="startGame('X')">X</button>
+    <button class="pick-btn" onclick="startGame('O')">O</button>
+  </div>
+  <div id="game-screen" style="display:none">
+    <h2>Super Tic-Tac-Toe</h2>
+    <div id="status"></div>
+    <div id="legend">
+      <span class="leg"><span class="dot" style="background:#378ADD"></span>Tablero activo</span>
+      <span class="leg"><span class="dot" style="background:#185FA5"></span>X ganó</span>
+      <span class="leg"><span class="dot" style="background:#A32D2D"></span>O ganó</span>
+    </div>
+    <div id="big-board"></div>
+    <div id="controls">
+      <button onclick="restartGame()">Nuevo juego ↺</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WIN = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+let PLAYER, CPU, boards, macroBoard, activeBoard, turn, gameOver;
+
+function startGame(choice){
+  PLAYER = choice;
+  CPU = choice==='X'?'O':'X';
+  document.getElementById('pick-screen').style.display='none';
+  document.getElementById('game-screen').style.display='block';
+  boards = Array.from({length:9},()=>Array(9).fill(null));
+  macroBoard = Array(9).fill(null);
+  activeBoard = -1;
+  turn = 'X';
+  gameOver = false;
+  render();
+  setStatus();
+  if(turn===CPU) setTimeout(cpuMove,400);
+}
+
+function restartGame(){
+  document.getElementById('pick-screen').style.display='block';
+  document.getElementById('game-screen').style.display='none';
+}
+
+function checkWinner(cells){
+  for(let [a,b,c] of WIN) if(cells[a]&&cells[a]===cells[b]&&cells[a]===cells[c]) return cells[a];
+  return cells.every(Boolean)?'D':null;
+}
+
+function render(){
+  const bb = document.getElementById('big-board');
+  bb.innerHTML='';
+  for(let bi=0;bi<9;bi++){
+    const mc = document.createElement('div');
+    mc.className='macro-cell';
+    const isActive = !gameOver&&turn===PLAYER&&(activeBoard===-1||activeBoard===bi)&&!macroBoard[bi];
+    if(isActive) mc.classList.add('active');
+    if(macroBoard[bi]==='X') mc.classList.add('won-X');
+    if(macroBoard[bi]==='O') mc.classList.add('won-O');
+    if(macroBoard[bi]==='D') mc.classList.add('drawn');
+    const mini = document.createElement('div');
+    mini.className='mini-board';
+    for(let ci=0;ci<9;ci++){
+      const cell = document.createElement('div');
+      cell.className='mini-cell';
+      if(boards[bi][ci]) { cell.classList.add('taken',boards[bi][ci].toLowerCase()); cell.textContent=boards[bi][ci]; }
+      else if(isActive&&!macroBoard[bi]){
+        cell.addEventListener('click',()=>playerMove(bi,ci));
+      }
+      mini.appendChild(cell);
+    }
+    mc.appendChild(mini);
+    if(macroBoard[bi]){
+      const ov=document.createElement('div');
+      ov.className='macro-winner '+macroBoard[bi];
+      ov.textContent=macroBoard[bi]==='D'?'–':macroBoard[bi];
+      mc.appendChild(ov);
+    }
+    bb.appendChild(mc);
+  }
+}
+
+function setStatus(){
+  const el=document.getElementById('status');
+  if(gameOver){
+    const w=checkWinner(macroBoard);
+    if(w===PLAYER) el.textContent='¡Ganaste! 🎉';
+    else if(w===CPU) el.textContent='La máquina ganó. ¡Intenta de nuevo!';
+    else el.textContent='¡Empate!';
+    return;
+  }
+  if(turn===PLAYER){
+    const where = activeBoard===-1?'cualquier tablero':'el tablero marcado';
+    el.textContent=`Tu turno (${PLAYER}) — Juega en ${where}`;
+  } else {
+    el.textContent='La máquina está pensando…';
+  }
+}
+
+function applyMove(bi,ci,player){
+  boards[bi][ci]=player;
+  const w=checkWinner(boards[bi]);
+  if(w) macroBoard[bi]=w;
+  const nextBoard = macroBoard[ci]?-1:ci;
+  activeBoard=nextBoard;
+  const macro=checkWinner(macroBoard);
+  if(macro){ gameOver=true; }
+  turn=turn==='X'?'O':'X';
+}
+
+function playerMove(bi,ci){
+  if(gameOver||turn!==PLAYER) return;
+  if(boards[bi][ci]) return;
+  if(activeBoard!==-1&&activeBoard!==bi) return;
+  applyMove(bi,ci,PLAYER);
+  render(); setStatus();
+  if(!gameOver) setTimeout(cpuMove,350);
+}
+
+function cpuMove(){
+  if(gameOver||turn!==CPU) return;
+  const move=getBestMove();
+  if(!move) return;
+  applyMove(move.bi,move.ci,CPU);
+  render(); setStatus();
+}
+
+function availableBoards(){
+  if(activeBoard===-1) return [...Array(9).keys()].filter(i=>!macroBoard[i]);
+  return macroBoard[activeBoard]?[...Array(9).keys()].filter(i=>!macroBoard[i]):[activeBoard];
+}
+
+function getBestMove(){
+  const abs=availableBoards();
+  for(const bi of abs){
+    for(const [a,b,c] of WIN){
+      const cells=boards[bi];
+      const triple=[cells[a],cells[b],cells[c]];
+      if(triple.filter(x=>x===CPU).length===2&&triple.includes(null)){
+        const ci=[a,b,c][triple.indexOf(null)];
+        return {bi,ci};
+      }
+    }
+  }
+  for(const bi of abs){
+    for(const [a,b,c] of WIN){
+      const cells=boards[bi];
+      const triple=[cells[a],cells[b],cells[c]];
+      if(triple.filter(x=>x===PLAYER).length===2&&triple.includes(null)){
+        const ci=[a,b,c][triple.indexOf(null)];
+        return {bi,ci};
+      }
+    }
+  }
+  const score=calcMacroScore(CPU)-calcMacroScore(PLAYER);
+  let best=null,bestScore=-Infinity;
+  for(const bi of abs){
+    for(let ci=0;ci<9;ci++){
+      if(boards[bi][ci]) continue;
+      const s=evalMove(bi,ci,CPU);
+      if(s>bestScore){bestScore=s;best={bi,ci};}
+    }
+  }
+  return best;
+}
+
+function calcMacroScore(p){
+  let s=0;
+  for(const [a,b,c] of WIN){
+    const t=[macroBoard[a],macroBoard[b],macroBoard[c]];
+    if(!t.includes(p===CPU?PLAYER:CPU)) s+=t.filter(x=>x===p).length;
+  }
+  return s;
+}
+
+function evalMove(bi,ci,player){
+  let score=0;
+  const tmpMini=[...boards[bi]]; tmpMini[ci]=player;
+  const miniW=checkWinner(tmpMini);
+  if(miniW===player){
+    const tmpMacro=[...macroBoard]; tmpMacro[bi]=player;
+    for(const [a,b,c] of WIN){
+      const t=[tmpMacro[a],tmpMacro[b],tmpMacro[c]];
+      if(t.every(x=>x===player)){score+=1000;break;}
+      if(!t.includes(player===CPU?PLAYER:CPU)) score+=t.filter(x=>x===player).length*10;
+    }
+    score+=50;
+  }
+  if(ci===4) score+=5;
+  if([0,2,6,8].includes(ci)) score+=3;
+  if(macroBoard[ci]===null){
+    for(const [a,b,c] of WIN){
+      const t=[boards[ci][a],boards[ci][b],boards[ci][c]];
+      if(t.filter(x=>x===player).length===2&&t.includes(null)) score+=8;
+      if(t.filter(x=>x===PLAYER).length===2&&t.includes(null)) score-=6;
+    }
+  } else { score+=2; }
+  return score;
+}
+</script>
