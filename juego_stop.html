@@ -1,0 +1,718 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;900&display=swap');
+
+  :root {
+    --red: #E63946;
+    --yellow: #FFD700;
+    --green: #2DC653;
+    --dark: #1a1a2e;
+    --card: #16213e;
+    --card2: #0f3460;
+    --text: #eaf0fb;
+    --muted: #8899bb;
+    --border: #2a3a6a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 20px; max-width: 820px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── INTRO ── */
+  #intro { text-align: center; padding-top: 30px; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 86px; line-height: 1;
+    color: var(--yellow); letter-spacing: 6px; text-shadow: 4px 4px 0 var(--red); }
+  .logo span { color: var(--red); }
+  .tagline { font-size: 15px; color: var(--muted); margin: 6px 0 28px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .letter-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 110px; color: var(--yellow);
+    background: var(--card);
+    width: 150px; height: 150px;
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    border: 3px solid var(--card2);
+    box-shadow: 0 0 40px rgba(255,215,0,0.15);
+    transition: all 0.3s;
+  }
+
+  .btn-main {
+    background: var(--yellow);
+    color: var(--dark);
+    border: none; border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 2px;
+    padding: 14px 48px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 0 #b8960a;
+  }
+  .btn-main:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #b8960a; }
+  .btn-main:active { transform: translateY(2px); box-shadow: 0 2px 0 #b8960a; }
+  .btn-main.red { background: var(--red); color: white; box-shadow: 0 4px 0 #8b1a22; }
+  .btn-main.red:hover { box-shadow: 0 6px 0 #8b1a22; }
+  .btn-main.green { background: var(--green); color: var(--dark); box-shadow: 0 4px 0 #1a7a35; }
+
+  .rules-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 24px;
+    text-align: left; margin: 20px 0 28px;
+    font-size: 14px; line-height: 1.8; color: var(--muted);
+  }
+  .rules-box b { color: var(--text); }
+
+  /* ── GAME ── */
+  #game { padding-top: 16px; }
+
+  .game-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+
+  .letter-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; color: var(--yellow);
+    background: var(--card); border-radius: 12px;
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--border);
+  }
+
+  .timer-wrap { text-align: center; }
+  .timer {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; color: var(--text);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .timer.warn { color: var(--red); animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.5; } }
+  .timer-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+  .btn-stop {
+    background: var(--red); color: white;
+    border: none; border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; letter-spacing: 3px;
+    padding: 12px 32px; cursor: pointer;
+    box-shadow: 0 4px 0 #8b1a22;
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: stopGlow 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes stopGlow {
+    from { box-shadow: 0 4px 0 #8b1a22, 0 0 10px rgba(230,57,70,0.3); }
+    to   { box-shadow: 0 4px 0 #8b1a22, 0 0 30px rgba(230,57,70,0.7); }
+  }
+  .btn-stop:hover { transform: translateY(-2px); }
+  .btn-stop:active { transform: translateY(2px); box-shadow: 0 2px 0 #8b1a22; }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .cat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+  .cat-card:focus-within { border-color: var(--yellow); }
+
+  .cat-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .cat-icon { font-size: 16px; }
+
+  .cat-input {
+    width: 100%; background: var(--dark);
+    border: 1.5px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 16px; font-weight: 700;
+    padding: 8px 12px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .cat-input:focus { border-color: var(--yellow); }
+  .cat-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── RESULTS ── */
+  #results { padding-top: 16px; }
+
+  .results-header { text-align: center; margin-bottom: 20px; }
+  .results-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px; color: var(--yellow); letter-spacing: 3px;
+  }
+  .round-info { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .results-table-wrap { overflow-x: auto; margin-bottom: 20px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--card2);
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 14px; text-align: left;
+  }
+  thead th:first-child { border-radius: 10px 0 0 10px; }
+  thead th:last-child  { border-radius: 0 10px 10px 0; }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 12px 14px; font-size: 14px; vertical-align: middle; }
+  tbody td:first-child { font-weight: 700; color: var(--muted); font-size: 11px;
+    letter-spacing: 1px; text-transform: uppercase; }
+
+  .word-cell { font-weight: 700; }
+  .pts { font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+  .pts.ten { color: var(--green); }
+  .pts.five { color: var(--yellow); }
+  .pts.zero { color: var(--muted); }
+  .pts.invalid { color: var(--red); }
+
+  .same-badge {
+    font-size: 10px; background: rgba(255,215,0,0.15);
+    color: var(--yellow); border-radius: 6px;
+    padding: 2px 7px; margin-left: 6px; font-weight: 600;
+  }
+  .invalid-badge {
+    font-size: 10px; background: rgba(230,57,70,0.15);
+    color: var(--red); border-radius: 6px;
+    padding: 2px 7px; margin-left: 6px; font-weight: 600;
+  }
+
+  .totals-row td { background: var(--card); font-weight: 900; }
+  .totals-row td:first-child { color: var(--text); }
+
+  .score-board {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .score-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 20px; text-align: center;
+  }
+  .score-card .who { font-size: 12px; color: var(--muted); letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 4px; }
+  .score-card .pts-big {
+    font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1;
+  }
+  .score-card.winner { border-color: var(--yellow);
+    box-shadow: 0 0 24px rgba(255,215,0,0.2); }
+  .score-card.winner .pts-big { color: var(--yellow); }
+  .score-card .pts-big { color: var(--muted); }
+
+  .history-title { font-size: 12px; color: var(--muted); letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 8px; }
+  .history-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .chip { background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; }
+  .chip.you { border-color: var(--green); color: var(--green); }
+  .chip.cpu { border-color: var(--red); color: var(--red); }
+  .chip.tie { border-color: var(--yellow); color: var(--yellow); }
+
+  .action-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* ── spinning letter ── */
+  @keyframes spin { from { transform: rotateY(0); } to { transform: rotateY(360deg); } }
+  .spinning { animation: spin 0.4s linear; }
+
+  .progress-bar {
+    width: 100%; height: 6px; background: var(--card2);
+    border-radius: 3px; overflow: hidden; margin-top: 6px;
+  }
+  .progress-fill {
+    height: 100%; background: var(--green);
+    transition: width 1s linear, background 0.3s;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ INTRO ═══════════════════════════════════════════════════════ -->
+<div id="intro" class="screen active">
+  <div class="logo">S<span>T</span>OP</div>
+  <div class="tagline">Humano vs Máquina · 60 segundos</div>
+
+  <div id="letter-disp" class="letter-display">?</div>
+
+  <div class="rules-box">
+    <b>📋 Reglas:</b><br>
+    Cada ronda se sortea una letra. Tienes <b>60 segundos</b> para llenar las categorías.<br>
+    • Respuesta <b>original</b> (solo tú o solo la máquina): <b>10 puntos</b><br>
+    • Respuesta <b>igual</b> (ambos pusieron lo mismo): <b>5 puntos cada uno</b><br>
+    • Respuesta <b>vacía o inválida</b> (no empieza con la letra): <b>0 puntos</b><br>
+    • Pulsa <b>STOP</b> para terminar antes de que acabe el tiempo.
+  </div>
+
+  <button class="btn-main" onclick="startGame()">▶ JUGAR</button>
+</div>
+
+<!-- ═══ GAME ═══════════════════════════════════════════════════════ -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div class="letter-badge" id="game-letter">?</div>
+    <div class="timer-wrap">
+      <div class="timer" id="timer">60</div>
+      <div class="timer-label">segundos</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    </div>
+    <button class="btn-stop" onclick="callStop()">¡STOP!</button>
+  </div>
+
+  <div class="categories-grid">
+    <div class="cat-card">
+      <div class="cat-label"><span class="cat-icon">👤</span> Nombre</div>
+      <input class="cat-input" id="inp-nombre" placeholder="ej: Andrés" autocomplete="off">
+    </div>
+    <div class="cat-card">
+      <div class="cat-label"><span class="cat-icon">🏷️</span> Apellido</div>
+      <input class="cat-input" id="inp-apellido" placeholder="ej: Álvarez" autocomplete="off">
+    </div>
+    <div class="cat-card">
+      <div class="cat-label"><span class="cat-icon">🍽️</span> Comida</div>
+      <input class="cat-input" id="inp-comida" placeholder="ej: Arepa" autocomplete="off">
+    </div>
+    <div class="cat-card">
+      <div class="cat-label"><span class="cat-icon">📦</span> Cosa</div>
+      <input class="cat-input" id="inp-cosa" placeholder="ej: Armario" autocomplete="off">
+    </div>
+    <div class="cat-card">
+      <div class="cat-label"><span class="cat-icon">🐾</span> Animal</div>
+      <input class="cat-input" id="inp-animal" placeholder="ej: Armadillo" autocomplete="off">
+    </div>
+    <div class="cat-card" style="display:flex;align-items:center;justify-content:center;border-style:dashed;opacity:0.6;">
+      <div style="text-align:center;font-size:13px;color:var(--muted)">
+        🏆 <b style="display:block;font-size:22px;color:var(--yellow)" id="my-live-score">0</b>
+        Mis puntos acumulados
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESULTS ════════════════════════════════════════════════════ -->
+<div id="results" class="screen">
+  <div class="results-header">
+    <div class="results-title">Resultados</div>
+    <div class="round-info" id="round-info"></div>
+  </div>
+
+  <div class="score-board">
+    <div class="score-card" id="sc-you">
+      <div class="who">Tú</div>
+      <div class="pts-big" id="sc-you-pts">0</div>
+      <div style="font-size:12px;color:var(--muted)" id="sc-you-round">+0 esta ronda</div>
+    </div>
+    <div class="score-card" id="sc-cpu">
+      <div class="who">Máquina</div>
+      <div class="pts-big" id="sc-cpu-pts">0</div>
+      <div style="font-size:12px;color:var(--muted)" id="sc-cpu-round">+0 esta ronda</div>
+    </div>
+  </div>
+
+  <div class="results-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Categoría</th>
+          <th>Tu respuesta</th>
+          <th>Pts</th>
+          <th>Máquina</th>
+          <th>Pts</th>
+        </tr>
+      </thead>
+      <tbody id="results-body"></tbody>
+    </table>
+  </div>
+
+  <div class="history-title">Historial de rondas</div>
+  <div class="history-chips" id="history-chips"></div>
+
+  <div class="action-row">
+    <button class="btn-main green" onclick="startGame()">▶ Otra ronda</button>
+    <button class="btn-main red" onclick="resetAll()">↺ Nuevo juego</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// VOCABULARY DATABASE
+// ════════════════════════════════════════════════════════════════════
+const DB = {
+  nombre: {
+    A:['Alejandro','Alicia','Andrés','Ana','Alberto','Agustín','Adriana','Amanda','Arturo','Alma'],
+    B:['Beatriz','Bernardo','Brenda','Boris','Bárbara','Belén','Bruno','Blanca'],
+    C:['Carlos','Carolina','Camilo','Claudia','Cristian','Catalina','César','Clara'],
+    D:['Daniel','Diana','Diego','Daniela','David','Dolores','Dario'],
+    E:['Eduardo','Elena','Emilio','Esperanza','Ernesto','Eva','Esteban','Elisa'],
+    F:['Francisco','Fernanda','Felipe','Fabio','Francisca','Federico','Flor'],
+    G:['Gabriel','Gloria','Gonzalo','Graciela','Gustavo','Gisela'],
+    H:['Hugo','Helena','Héctor','Horacio','Herminia'],
+    I:['Ignacio','Isabel','Ivan','Irene','Ingrid'],
+    J:['Juan','Juliana','Jorge','Jessica','Jaime','Jimena','José'],
+    K:['Karen','Karina','Kevin','Katherine'],
+    L:['Luis','Laura','Lucía','Leonardo','Lorena','León','Lina'],
+    M:['María','Marcos','Mónica','Miguel','Manuela','Manuel','Marta'],
+    N:['Nicolás','Natalia','Nelson','Norma','Néstor'],
+    O:['Oscar','Olga','Orlando','Oriana'],
+    P:['Pablo','Paola','Pedro','Patricia','Paula','Pilar'],
+    Q:['Quintín','Quirina'],
+    R:['Roberto','Rosa','Rodrigo','Rafaela','Ricardo','Ramón'],
+    S:['Santiago','Sofía','Sebastián','Sara','Simón','Silvia'],
+    T:['Tomás','Teresa','Tatiana','Timoteo'],
+    U:['Ulises','Ursula','Urbano'],
+    V:['Valentina','Víctor','Valeria','Verónica','Vicente'],
+    W:['Walter','Wendy','Wilson'],
+    X:['Xavier','Ximena'],
+    Y:['Yolanda','Yamila','Yesenia'],
+    Z:['Zoe','Zoila','Zaira'],
+  },
+  apellido: {
+    A:['Álvarez','Arias','Aguilar','Acosta','Arango','Arredondo','Andrade'],
+    B:['Bermúdez','Barrera','Bedoya','Botero','Buitrago','Burgos'],
+    C:['Castro','Cardona','Castillo','Cifuentes','Córdoba','Castaño'],
+    D:['Díaz','Duarte','Delgado','Durán','Dávila'],
+    E:['Escobar','Espinosa','Estrada','Echeverri'],
+    F:['Flores','Fuentes','Franco','Figueroa','Fonseca'],
+    G:['García','González','Gutiérrez','Gómez','Guerrero','Giraldo'],
+    H:['Hernández','Herrera','Henao','Hurtado'],
+    I:['Iglesias','Ibáñez','Infante'],
+    J:['Jiménez','Jaramillo','Juárez'],
+    K:['Keller','Kingston'],
+    L:['López','Luna','Lozano','Londoño','Leiva'],
+    M:['Martínez','Morales','Moreno','Mejía','Molina','Medina'],
+    N:['Nieto','Navarro','Naranjo'],
+    O:['Ortiz','Ospina','Ocampo'],
+    P:['Pérez','Parra','Pineda','Palomino','Piedrahita'],
+    Q:['Quintero','Quijano'],
+    R:['Rodríguez','Ramírez','Reyes','Rojas','Rincón','Ramos'],
+    S:['Sánchez','Suárez','Salcedo','Silva','Soto'],
+    T:['Torres','Toro','Tamayo','Trujillo'],
+    U:['Uribe','Urrego'],
+    V:['Vargas','Valencia','Vásquez','Velásquez','Villa'],
+    W:['Wilches','Wills'],
+    X:['Ximénez'],
+    Y:['Yáñez','Yepes'],
+    Z:['Zapata','Zuluaga','Zamora'],
+  },
+  comida: {
+    A:['Arepa','Arroz','Aguacate','Ajiaco','Almendra','Arveja','Atún','Avena'],
+    B:['Bandeja paisa','Buñuelo','Brownie','Bizcocho','Batata','Brócoli'],
+    C:['Caldo','Carne','Cerdo','Chorizo','Chicha','Cocido','Ceviche','Chocolate'],
+    D:['Durazno','Dulce','Dátil','Donut'],
+    E:['Empanada','Enchilada','Espagueti','Ensalada','Espinaca'],
+    F:['Frijol','Flan','Frambuesa','Fideo','Fresas'],
+    G:['Guiso','Galleta','Gelatina','Guayaba','Guanábana'],
+    H:['Hamburguesa','Helado','Horchata','Higo'],
+    I:['Icaco'],
+    J:['Jamón','Jugo','Jitomate'],
+    K:['Kiwi','Kibbe'],
+    L:['Lenteja','Limón','Lasaña','Langosta'],
+    M:['Mango','Maíz','Mazamorra','Morcilla','Mermelada','Mandarina'],
+    N:['Naranja','Natilla','Noodles'],
+    O:['Oca','Orégano','Omelette'],
+    P:['Papa','Panela','Plátano','Pizza','Palomitas','Pavo','Pimentón'],
+    Q:['Queso','Quinua'],
+    R:['Remolacha','Res','Relleno','Risotto'],
+    S:['Sancocho','Sopa','Salchichón','Salmón'],
+    T:['Tamal','Tomate','Torta','Trucha','Taco'],
+    U:['Uva','Uchuva'],
+    V:['Verdura','Vitamina C','Viche'],
+    W:['Waffle','Wrap'],
+    X:['Xoconostle'],
+    Y:['Yuca','Yogur'],
+    Z:['Zanahoria','Zapote','Zucchini'],
+  },
+  cosa: {
+    A:['Armario','Agenda','Avión','Alfombra','Auricular','Abanico','Aspiradora'],
+    B:['Bolígrafo','Bolso','Bicicleta','Batería','Bombillo'],
+    C:['Cama','Carro','Celular','Computador','Cuaderno','Calculadora'],
+    D:['Disco','Diario','Ducha'],
+    E:['Escritorio','Escalera','Espejo','Estufa'],
+    F:['Falda','Folder','Florero'],
+    G:['Gabinete','Gorra','Guitarra'],
+    H:['Horno','Hamaca','Herramienta'],
+    I:['Impresora','Interruptor'],
+    J:['Jarrón','Juguete'],
+    K:['Kayak'],
+    L:['Lámpara','Llave','Libro','Laptop'],
+    M:['Mesa','Mochila','Maleta','Monitor','Moto'],
+    N:['Nevera','Notebook'],
+    O:['Olla','Ordenador'],
+    P:['Pantalla','Pared','Pincel','Pizarrón','Puerta'],
+    Q:['Quemador'],
+    R:['Radio','Reloj','Regla','Refrigerador'],
+    S:['Silla','Sofá','Sartén','Smartphone'],
+    T:['Televisor','Taza','Tijeras','Teléfono'],
+    U:['Uniforme','USB'],
+    V:['Ventilador','Vaso','Videocámara'],
+    W:['Walkie-talkie'],
+    X:['Xilófono'],
+    Y:['Yate'],
+    Z:['Zapato','Zócalo'],
+  },
+  animal: {
+    A:['Armadillo','Águila','Ardilla','Anaconda','Avispa','Antílope','Abeja'],
+    B:['Burro','Búfalo','Ballena','Boa','Buitre','Búho'],
+    C:['Caballo','Caimán','Canguro','Cocodrilo','Cóndor','Cangrejo','Cabra'],
+    D:['Delfín','Dromedario','Dingo'],
+    E:['Elefante','Erizo','Escorpión'],
+    F:['Flamenco','Foca','Faisán','Felino'],
+    G:['Gorila','Gallina','Gato','Gavilán','Guacamaya'],
+    H:['Hipopótamo','Halcón','Hormiga'],
+    I:['Iguana','Impala'],
+    J:['Jaguar','Jirafa'],
+    K:['Koala','Kiwi (ave)'],
+    L:['León','Leopardo','Lagarto','Lobo','Llama'],
+    M:['Murciélago','Mono','Mariposa','Mula','Mapache'],
+    N:['Nutria','Ñandú'],
+    O:['Oso','Ocelote','Orangután'],
+    P:['Pantera','Paloma','Perro','Puma','Pingüino'],
+    Q:['Quetzal'],
+    R:['Rata','Rinoceronte','Rana','Reno'],
+    S:['Serpiente','Sapo','Salamandra','Suricata'],
+    T:['Tigre','Tortuga','Tapir','Tucán'],
+    U:['Urraca'],
+    V:['Vaca','Víbora','Venado','Vampiro (murciélago)'],
+    W:['Wombat'],
+    X:['Xenops'],
+    Y:['Yaguareté','Yak'],
+    Z:['Zorro','Zarigüeya'],
+  }
+};
+
+const CATS = ['nombre','apellido','comida','cosa','animal'];
+const CAT_LABELS = { nombre:'Nombre', apellido:'Apellido', comida:'Comida', cosa:'Cosa', animal:'Animal' };
+const CAT_ICONS  = { nombre:'👤', apellido:'🏷️', comida:'🍽️', cosa:'📦', animal:'🐾' };
+const LETTERS = 'ABCDEFGHIJKLMNOPRSTV'.split('');
+
+let state = {
+  letter: '',
+  totalYou: 0,
+  totalCpu: 0,
+  roundHistory: [],
+  timer: null,
+  timeLeft: 60,
+};
+
+// ── helpers ──────────────────────────────────────────────────────────
+function normalize(s){ return s.trim().toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+function startsWithLetter(word, letter){
+  return normalize(word).startsWith(normalize(letter));
+}
+
+function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function getCpuAnswers(letter){
+  const answers = {};
+  CATS.forEach(cat => {
+    const pool = DB[cat][letter] || [];
+    if(pool.length && Math.random() > 0.08){
+      answers[cat] = pickRandom(pool);
+    } else {
+      answers[cat] = '';
+    }
+  });
+  // occasionally make cpu repeat a common word to trigger "same" score
+  if(Math.random() < 0.25){
+    const cat = pickRandom(CATS);
+    const pool = DB[cat][letter] || [];
+    if(pool.length) answers[cat] = pickRandom(pool);
+  }
+  return answers;
+}
+
+// ── navigation ───────────────────────────────────────────────────────
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── game flow ────────────────────────────────────────────────────────
+function startGame(){
+  state.letter = pickRandom(LETTERS);
+  state.timeLeft = 60;
+
+  // update displays
+  const ld = document.getElementById('letter-disp');
+  ld.textContent = state.letter;
+  ld.classList.add('spinning');
+  setTimeout(()=>ld.classList.remove('spinning'),400);
+
+  document.getElementById('game-letter').textContent = state.letter;
+  document.getElementById('timer').textContent = '60';
+  document.getElementById('timer').classList.remove('warn');
+  document.getElementById('prog').style.width = '100%';
+  document.getElementById('prog').style.background = 'var(--green)';
+  document.getElementById('my-live-score').textContent = state.totalYou;
+
+  CATS.forEach(c=>{
+    const el = document.getElementById('inp-'+c);
+    el.value = '';
+    el.disabled = false;
+    el.placeholder = `empieza con ${state.letter}...`;
+  });
+
+  show('game');
+  document.getElementById('inp-nombre').focus();
+
+  clearInterval(state.timer);
+  state.timer = setInterval(tick, 1000);
+}
+
+function tick(){
+  state.timeLeft--;
+  const el = document.getElementById('timer');
+  el.textContent = state.timeLeft;
+
+  const pct = (state.timeLeft/60)*100;
+  const prog = document.getElementById('prog');
+  prog.style.width = pct+'%';
+  if(state.timeLeft <= 20) prog.style.background = 'var(--red)';
+  else if(state.timeLeft <= 35) prog.style.background = 'var(--yellow)';
+
+  if(state.timeLeft <= 10) el.classList.add('warn');
+
+  if(state.timeLeft <= 0){
+    clearInterval(state.timer);
+    endRound();
+  }
+}
+
+function callStop(){
+  clearInterval(state.timer);
+  endRound();
+}
+
+function endRound(){
+  CATS.forEach(c=>document.getElementById('inp-'+c).disabled = true);
+  const letter = state.letter;
+  const cpuAns = getCpuAnswers(letter);
+  const youAns = {};
+  CATS.forEach(c=>youAns[c] = document.getElementById('inp-'+c).value.trim());
+
+  // scoring
+  let youRound = 0, cpuRound = 0;
+  const rowData = [];
+
+  CATS.forEach(cat => {
+    const y = youAns[cat];
+    const m = cpuAns[cat];
+    const yValid = y !== '' && startsWithLetter(y, letter);
+    const mValid = m !== '' && startsWithLetter(m, letter);
+    const same   = yValid && mValid && normalize(y) === normalize(m);
+
+    let yPts = 0, mPts = 0, flag = '';
+    if(same){
+      yPts = 5; mPts = 5; flag = 'same';
+    } else {
+      if(yValid){ yPts = 10; }
+      if(mValid){ mPts = 10; }
+    }
+    if(!yValid && y !== '') yPts = 0;
+    if(!mValid && m !== '') mPts = 0;
+
+    youRound += yPts;
+    cpuRound += mPts;
+    rowData.push({ cat, y, m, yValid, mValid, yPts, mPts, same });
+  });
+
+  state.totalYou += youRound;
+  state.totalCpu += cpuRound;
+
+  const winner = youRound > cpuRound ? 'you' : youRound < cpuRound ? 'cpu' : 'tie';
+  state.roundHistory.push({ letter, youRound, cpuRound, winner });
+
+  showResults(rowData, youRound, cpuRound, letter);
+}
+
+function showResults(rows, youRound, cpuRound, letter){
+  document.getElementById('round-info').textContent =
+    `Letra: ${letter} · Ronda ${state.roundHistory.length}`;
+
+  // score cards
+  const scYou = document.getElementById('sc-you');
+  const scCpu = document.getElementById('sc-cpu');
+  scYou.classList.toggle('winner', state.totalYou >= state.totalCpu);
+  scCpu.classList.toggle('winner', state.totalCpu > state.totalYou);
+  document.getElementById('sc-you-pts').textContent = state.totalYou;
+  document.getElementById('sc-cpu-pts').textContent = state.totalCpu;
+  document.getElementById('sc-you-round').textContent = `+${youRound} esta ronda`;
+  document.getElementById('sc-cpu-round').textContent = `+${cpuRound} esta ronda`;
+
+  // table
+  const tbody = document.getElementById('results-body');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const yBadge = r.same ? '<span class="same-badge">IGUAL</span>' :
+                   (!r.yValid && r.y) ? '<span class="invalid-badge">INVÁLIDA</span>' : '';
+    const mBadge = r.same ? '<span class="same-badge">IGUAL</span>' :
+                   (!r.mValid && r.m) ? '<span class="invalid-badge">INVÁLIDA</span>' : '';
+    const yClass = r.yPts===10?'ten':r.yPts===5?'five':r.yValid===false&&r.y?'invalid':'zero';
+    const mClass = r.mPts===10?'ten':r.mPts===5?'five':r.mValid===false&&r.m?'invalid':'zero';
+    tr.innerHTML = `
+      <td>${CAT_ICONS[r.cat]} ${CAT_LABELS[r.cat]}</td>
+      <td class="word-cell">${r.y||'<span style="color:var(--muted)">—</span>'}${yBadge}</td>
+      <td><span class="pts ${yClass}">${r.yPts}</span></td>
+      <td class="word-cell">${r.m||'<span style="color:var(--muted)">—</span>'}${mBadge}</td>
+      <td><span class="pts ${mClass}">${r.mPts}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // totals row
+  const tot = document.createElement('tr');
+  tot.className = 'totals-row';
+  tot.innerHTML = `
+    <td>TOTAL RONDA</td>
+    <td></td>
+    <td><span class="pts ${youRound>cpuRound?'ten':youRound===cpuRound?'five':'zero'}">${youRound}</span></td>
+    <td></td>
+    <td><span class="pts ${cpuRound>youRound?'ten':cpuRound===youRound?'five':'zero'}">${cpuRound}</span></td>
+  `;
+  tbody.appendChild(tot);
+
+  // history chips
+  const chips = document.getElementById('history-chips');
+  chips.innerHTML = '';
+  state.roundHistory.forEach((h,i)=>{
+    const cls = h.winner==='you'?'you':h.winner==='cpu'?'cpu':'tie';
+    const label = h.winner==='you'?'Tú ganaste':h.winner==='cpu'?'CPU ganó':'Empate';
+    chips.innerHTML += `<span class="chip ${cls}">${h.letter}: ${label} (${h.youRound}-${h.cpuRound})</span>`;
+  });
+
+  show('results');
+}
+
+function resetAll(){
+  state.totalYou = 0;
+  state.totalCpu = 0;
+  state.roundHistory = [];
+  clearInterval(state.timer);
+  show('intro');
+}
+</script>
+</body>
+</html>
